@@ -49,6 +49,7 @@ tables = {
 
 
 def connect_db():
+
     _conn = pymysql.connect(
         host=os.environ.get("MYSQL_HOST"),
         user=os.environ.get("MYSQL_USER"),
