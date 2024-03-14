@@ -1,0 +1,3 @@
+INSERT INTO $table VALUES (null, '2021-09-01', '2022-06-30');
+INSERT INTO $table VALUES (null, '2022-09-01', '2023-06-30');
+INSERT INTO $table VALUES (null, '2023-09-01', '2024-06-30');
