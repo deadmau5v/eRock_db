@@ -204,5 +204,23 @@ class Nalysis(Creater):
         return random.choice(nalysis)
 
 
+class URL_img(Creater):
+    def __init__(self):
+        super().__init__("图片URL")
+
+    def create(self):
+        urls = [
+            'https://cdn1.d5v.cc/CDN/Project/eRock/test/test%20%288%29.jpg',
+            'https://cdn1.d5v.cc/CDN/Project/eRock/test/test%20%287%29.jpg',
+            'https://cdn1.d5v.cc/CDN/Project/eRock/test/test%20%286%29.jpg',
+            'https://cdn1.d5v.cc/CDN/Project/eRock/test/test%20%285%29.jpg',
+            'https://cdn1.d5v.cc/CDN/Project/eRock/test/test%20%284%29.jpg',
+            'https://cdn1.d5v.cc/CDN/Project/eRock/test/test%20%283%29.jpg',
+            'https://cdn1.d5v.cc/CDN/Project/eRock/test/test%20%282%29.jpg',
+            'https://cdn1.d5v.cc/CDN/Project/eRock/test/test%20%281%29.jpg',
+        ]
+        return random.choice(urls)
+
+
 if __name__ == '__main__':
     dt = DateTime(start="2024-03-14 08:00:00")

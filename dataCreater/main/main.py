@@ -298,6 +298,8 @@ def _enumerate(table_name):
         "课前": "A1",
         "课中": "A2",
         "课后": "A3",
+        "社团训练": "B1",
+        "球队训练": "B2",
     }
     num = 1
     for k, v in data.items():
@@ -331,6 +333,46 @@ def add_a_mark_sheet_score(table_name, table_name2):
             f"UPDATE {table_name} SET ms_score = {ms_score}, ms_dribble = {ms_dribble}, ms_shooting = {ms_shooting} WHERE ms_id = {ms_id};"
         )
         execute(sql)
+
+
+# b1_franchise_club
+def b1_franchise_club(table_name, length):
+    all_student_id = query(f"select stu_id from {tables['student']}")
+    all_student_id = [str(i[0]) for i in all_student_id]
+    alL_enum_id = query(f"select enum_id, enum_code from {tables['enumerate']}")
+    alL_enum_id = [str(i[0]) for i in alL_enum_id if i[1] in ["B1", "B2"]]
+
+    for i in range(1, length + 1):
+        while True:
+            # tc_id
+            enum_id = random.choice(alL_enum_id)
+            stu_id = random.choice(all_student_id)
+            tc_url = creater.URL_img().create()
+            tc_time = creater.DateTime(f"2024-03-{random.randint(1, 31)} {random.randint(8, 19)}:00:00").create()
+            sql = (f"INSERT INTO {table_name} (enum_id, stu_id, tc_url, tc_time) "
+                   f"VALUES ({enum_id}, {stu_id}, '{tc_url}', '{tc_time}') "
+                   f"ON DUPLICATE KEY UPDATE enum_id = VALUES(enum_id), stu_id = VALUES(stu_id), tc_url = VALUES(tc_url), tc_time = VALUES(tc_time);")
+            try:
+                execute(sql)
+                break
+            except pymysql.err.DataError:
+                print(sql)
+                print("E")
+
+
+# b1_mass_source
+def b1_mass_source(table_name):
+    all_tc_id = query(f"select tc_id from {tables['b1_franchise_club']}")
+    all_tc_id = [str(i[0]) for i in all_tc_id]
+    for i in all_tc_id:
+        if random.randint(0, 1):
+            # mas_id = i
+            teas_url = creater.URL_img().create()
+            tc_id = i
+            sql = (f"INSERT INTO {table_name} (tc_id, teas_url) "
+                   f"VALUES ('{tc_id}', '{teas_url}') "
+                   f"ON DUPLICATE KEY UPDATE tc_id = VALUES(tc_id), teas_url = VALUES(teas_url);")
+            execute(sql)
 
 
 # 增加自动增长
@@ -403,4 +445,6 @@ if __name__ == '__main__':
     # a_mark_sheet(tables["a_mark_sheet"], 100)  # 评分表
     # a_ball_exam(tables["a_ball_exam"])  # 投篮运球表
     # add_a_mark_sheet_score(tables["a_mark_sheet"], tables["a_ball_exam"])  # 计算分数
+    # b1_franchise_club(tables["b1_franchise_club"], 100)  # 加入训练
+    # b1_mass_source(tables["b1_mass_source"])  # 资源表
     ...
