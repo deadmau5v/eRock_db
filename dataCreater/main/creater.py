@@ -222,5 +222,37 @@ class URL_img(Creater):
         return random.choice(urls)
 
 
+class Race_Name(Creater):
+    #
+    def __init__(self, sub_start=0):
+        super().__init__("比赛名称")
+        self.sub_start = sub_start
+
+    def create(self):
+        competition_names = [
+            "冠军杯",
+            "精英赛",
+            "挑战杯",
+            "夺冠之战",
+            "决胜之战",
+            "巅峰对决",
+            "终极竞技",
+            "胜者为王",
+            "荣耀之争",
+            "传奇之路",
+            "巅峰之战",
+            "豪门对决",
+            "风暴之战",
+            "狂欢赛场",
+            "赢得荣耀",
+            "冠军之争",
+            "巅峰盛会",
+            "荣耀擂台",
+            "拔得头筹",
+            "至高荣耀"
+        ]
+        return competition_names[self.sub_start]
+
+
 if __name__ == '__main__':
     dt = DateTime(start="2024-03-14 08:00:00")
