@@ -1,3 +1,4 @@
+import json
 import random
 
 import faker
@@ -252,6 +253,19 @@ class Race_Name(Creater):
             "至高荣耀"
         ]
         return competition_names[self.sub_start]
+
+
+class Question(Creater):
+    """知识问答生成"""
+
+    def __init__(self):
+        super().__init__("知识问答")
+
+    def create(self):
+        with open("eRock/questions.json", 'r', encoding='utf-8') as f:
+            json_data = json.load(f)
+            q = random.choice(json_data)
+        return q['question'], q['result']
 
 
 if __name__ == '__main__':
