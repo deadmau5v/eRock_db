@@ -364,48 +364,6 @@ def b1_mass_source(table_name):
             execute(sql)
 
 
-def clear_primary_key(table_name):
-    """清空表数据并重置主键自动增长"""
-    print("清空表数据并重置主键自动增长")
-    sql = f"truncate table {table_name}"
-    print(sql)
-    execute(sql)
-
-
-tables_key = {
-    tables["student"]: ["stu_id", "学生学号"],
-    tables["teacher"]: ["tea_id", "老师工号"],
-    tables["grade"]: ["class_id", "班级编号"],
-    tables["stu_group"]: ["gg_id", "小组ID"],
-    tables["class_register"]: ["cr_id", "课堂ID"],
-    tables["semester"]: ["semester_id", "学期ID"],
-    tables["total_score"]: ["ts_id", "总分ID"],
-    tables["a2_student_evaluate"]: ["se_id", "学生互评ID"],
-    tables["a_exercise_resource"]: ["er_id", "资源ID"],
-    tables["a2_teaching_assistant_evaluation"]: ["tae_id", "教师评价ID"],
-    tables["a2_teaching_assistant"]: ["ta_id", "助教评价ID"],
-    tables["a_mark_sheet"]: ["ms_id", "评分ID"],
-    tables["a2_ideological_performance"]: ["ip_id", "思政表现ID"],
-    tables["a_exercise_task"]: ["et_id", "任务ID"],
-    tables["a2_attendance"]: ["aa_id", "考勤ID"],
-    tables["a_ball_exam"]: ["be_id", "运球ID"],
-    tables["a2_a3_physical_test"]: ["phy_id", "任务ID"],
-    tables["a2_a3_physica_score"]: ["phys_id", "成绩ID"],
-    tables["enumerate"]: ["enum_id", "枚举ID"],
-    tables["a1_viewed"]: ["view_id", "记录ID"],
-    tables["b1_franchise_club"]: ["tc_id", "训练ID"],
-    tables["b1_mass_source"]: ["mas_id", "资源ID"],
-    tables["a1_result"]: ["oo_id", "答案ID"],
-    tables["teaching_table"]: ["teaching_id", "教学资源ID"],
-    tables["a1_teaching_source"]: ["teas_id", "资源ID"],
-    tables["a1_question"]: ["qq_id", "题目编号"],
-    tables["a1_communication"]: ["comm_id", "帖子ID"],
-    tables["a1_answer"]: ["ans_id", "答题ID"],
-}
-
-
-# 增加自动增长
-# add_incident(tables_key)
 
 def add_incident(tables: dict):
     for table_name in list(tables.keys()):
