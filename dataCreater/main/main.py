@@ -35,6 +35,7 @@ tables = {
     "a1_question": "a1_question",
     "a1_answer": "a1_answer",
     "a1_communication": "a1_communication",
+    "module_score": "module_score"
 }
 
 
@@ -364,7 +365,6 @@ def b1_mass_source(table_name):
             execute(sql)
 
 
-
 def add_incident(tables: dict):
     for table_name in list(tables.keys()):
         key = tables[table_name][0]
@@ -435,6 +435,44 @@ def add_total_score(table_name1, table_name2):
             execute(sql)
 
 
+def add_a3_score():
+    all_total_score_id = query(f"select ts_id from {tables['total_score']}")
+    all_total_score_id = [str(i[0]) for i in all_total_score_id]
+
+
+    for score_id in all_total_score_id:
+        sql = f"select stu_id from {tables['total_score']} where ts_id = {score_id}"
+        student_id = query(sql)
+        student_id = student_id[0][0]
+
+
+        ms_score = query(
+            f"select ms_score from {tables['a_mark_sheet']} where stu_id = {student_id} ")
+        ms_score = [str(i[0]) for i in ms_score]
+        if not ms_score:
+            print("pass")
+            continue
+
+        # 原本增加
+        avs_score = query(f"select avs_score from {tables['module_score']} where ts_id = {score_id} and enum_id = 3")
+        try:
+            avs_score = avs_score[0][0]
+            avs_score = float(avs_score) + float(ms_score[0]) * 0.2
+            enum_id = "3"
+            ts_id = score_id
+            sql = f"UPDATE {tables['module_score']} SET avs_score = {avs_score} WHERE ts_id = {ts_id} and enum_id = {enum_id};"
+            print(sql)
+            execute(sql)
+        except IndexError:
+            avs_score = float(ms_score[0]) * 0.2
+            enum_id = "3"
+            ts_id = score_id
+            sql = f"INSERT INTO {tables['module_score']} (ts_id, enum_id, avs_score) VALUES ({ts_id}, {enum_id}, {avs_score});"
+            print(sql)
+            execute(sql)
+
+
+
 if __name__ == '__main__':
     # grade(tables["grade"])  # 班级
     # semester(tables["semester"])  # 学期
@@ -451,5 +489,6 @@ if __name__ == '__main__':
     # add_a_mark_sheet_score(tables["a_mark_sheet"], tables["a_ball_exam"])  # 计算分数
     # b1_franchise_club(tables["b1_franchise_club"], 100)  # 加入训练
     # b1_mass_source(tables["b1_mass_source"])  # 资源表
-    add_total_score(tables["total_score"], tables["student"])  # 注册总分表
+    # add_total_score(tables["total_score"], tables["student"])  # 注册总分表
+    add_a3_score()
     ...
