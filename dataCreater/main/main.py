@@ -365,20 +365,6 @@ def b1_mass_source(table_name):
             execute(sql)
 
 
-def add_incident(tables: dict):
-    for table_name in list(tables.keys()):
-        key = tables[table_name][0]
-        comment = tables[table_name][1]
-        # 保持类型
-        sql = f"alter table {table_name} modify {key} int auto_increment COMMENT '{comment}';"
-        print(sql)
-        if table_name == "student":
-            # 设置学号从202253210250开始
-            sql = f"alter table {table_name} auto_increment = 202253210250 COMMENT '{comment}';"
-            print(sql)
-        execute(sql)
-
-
 def clear_primary_key(table_name):
     """清空表数据并重置主键自动增长"""
     print("清空表数据并重置主键自动增长")
@@ -414,13 +400,28 @@ tables_key = {
     tables["teaching_table"]: ["teaching_id", "教学资源ID"],
     tables["a1_teaching_source"]: ["teas_id", "资源ID"],
     tables["a1_question"]: ["qq_id", "题目编号"],
-    tables["a1_communication"]: ["comm_id", "帖子ID"],
+    tables["a1_communication"]: ["com_id", "帖子ID"],
     tables["a1_answer"]: ["ans_id", "答题ID"],
 }
 
 
+def add_incident(tables: dict):
+    for table_name in list(tables.keys()):
+        key = tables[table_name][0]
+        comment = tables[table_name][1]
+        # 保持类型
+        sql = f"alter table {table_name} modify {key} int auto_increment COMMENT '{comment}';"
+        print(sql)
+        if table_name == "student":
+            # 设置学号从202253210250开始
+            sql = f"alter table {table_name} auto_increment = 202253210250 COMMENT '{comment}';"
+            print(sql)
+        execute(sql)
+
+
 # 增加自动增长
 # add_incident(tables_key)
+
 
 def add_total_score(table_name1, table_name2):
     # 创建每个学号的总分记录 并不记录成绩 仅记录
@@ -490,5 +491,7 @@ if __name__ == '__main__':
     # b1_franchise_club(tables["b1_franchise_club"], 100)  # 加入训练
     # b1_mass_source(tables["b1_mass_source"])  # 资源表
     # add_total_score(tables["total_score"], tables["student"])  # 注册总分表
+
     add_a3_score()
+
     ...
