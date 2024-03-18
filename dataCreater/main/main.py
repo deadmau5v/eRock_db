@@ -16,7 +16,18 @@ tables = {
     "class_register": "class_register",
     "semester": "semester",
     "total_score": "total_score",
+    "c1_bonus_point": "c1_bonus_point",
+    "c1_total_points": "c1_total_points",
+    "c2_competition_record": "c2_competition_record",
+    "c2_personnel_sheet": "c2_personnel_sheet",
+    "c2_proof": "c2_proof",
+    "d2_resource": "d2_resource",
+    "d2_certificate": "d2_certificate",
+    "a_classroom_score": "a_classroom_score",
+    "b_training_score": "b_training_score",
     "a2_student_evaluate": "a2_student_evaluate",
+    "d_add_value_score": "d_add_value_score",
+    "c_event_score": "c_event_score",
     "a_exercise_resource": "a_exercise_resource",
     "a2_teaching_assistant_evaluation": "a2_teaching_assistant_evaluation",
     "a2_teaching_assistant": "a2_teaching_assistant",
@@ -364,18 +375,61 @@ def b1_mass_source(table_name):
             execute(sql)
 
 
-def add_incident(tables: dict):
-    for table_name in list(tables.keys()):
-        key = tables[table_name][0]
-        comment = tables[table_name][1]
-        # 保持类型
-        sql = f"alter table {table_name} modify {key} int auto_increment COMMENT '{comment}';"
-        print(sql)
-        if table_name == "student":
-            # 设置学号从202253210250开始
-            sql = f"alter table {table_name} auto_increment = 202253210250 COMMENT '{comment}';"
-            print(sql)
-        execute(sql)
+
+# 增加自动增长
+# add_incident({
+# tables["student"]: "stu_id",
+# tables["teacher"]: "tea_id",
+# tables["grade"]: "class_id",
+# tables["stu_group"]: "gg_id",
+# tables["class_register"]: "cr_id",
+# tables["semester"]: "semester_id",
+# tables["total_score"]: "ts_id",
+# tables["c1_bonus_point"]: "bp_id",
+# tables["c1_total_points"]: "tp_id",
+# tables["c2_competition_record"]: "cc_r_id",
+# tables["c2_personnel_sheet"]: "ps_id",
+# tables["c2_proof"]: "proof_id",
+# tables["d2_resource"]: "resource_id",
+# tables["d2_certificate"]: "certificate_id",
+# tables["a_classroom_score"]: "crs_id",
+# tables["b_training_score"]: "trs_id",
+# tables["a2_student_evaluate"]: "se_id",
+# tables["d_add_value_score"]: "avs_id",
+# tables["c_event_score"]: "evs_id",
+# tables["a_exercise_resource"]: "er_id",
+# tables["a2_teaching_assistant_evaluation"]: "tae_id",
+# tables["a2_teaching_assistant"]: "ta_id",
+# tables["a_mark_sheet"]: "ms_id",
+# tables["a2_ideological_performance"]: "ip_id",
+# tables["a_exercise_task"]: "et_id",
+# tables["a2_attendance"]: "aa_id",
+# tables["a_ball_exam"]: "be_id",
+# tables["a2_a3_physical_test"]: "phy_id",
+# tables["a2_a3_physica_score"]: "phys_id",
+# tables["enumerate"]: "enum_id",
+# tables["a1_viewed"]: "view_id",
+# tables["b1_franchise_club"]: "tc_id",
+# tables["b1_mass_source"]: "mas_id",
+# tables["a1_result"]: "oo_id",
+# tables["teaching_table"]: "teaching_id",
+# tables["a1_teaching_source"]: "teas_id",
+# tables["a1_question"]: "qq_id",
+# tables["a1_communication"]: "comm_id",
+# tables["a1_answer"]: "ans_id",
+# })
+
+# def add_incident(tables: dict):
+#     for table_name in list(tables.keys()):
+#         key = tables[table_name]
+#         # 保持类型
+#         sql = f"alter table {table_name} modify {key} int auto_increment;"
+#         print(sql)
+#         if table_name == "student":
+#             # 设置学号从202253210250开始
+#             sql = f"alter table {table_name} auto_increment = 202253210250;"
+#             print(sql)
+#         execute(sql)
 
 
 def clear_primary_key(table_name):
