@@ -2,6 +2,7 @@ import json
 import random
 
 import faker
+import pandas
 
 
 class Creater:
@@ -266,6 +267,37 @@ class Question(Creater):
             json_data = json.load(f)
             q = random.choice(json_data)
         return q['question'], q['result']
+
+
+class Conversion(Creater):
+    def __init__(self):
+        super().__init__("T分转换")
+
+    def create(self):
+        df = pandas.read_excel("eRock/T分转换.xlsx", skiprows=1)
+        data = []
+        for i in range(0, 10, 2):
+            con_t_score_list = df.iloc[:, i]
+            con_pro_score_list = df.iloc[:, i + 1]
+            for x in range(con_t_score_list.__len__()):
+                if not pandas.isna(con_t_score_list[x]) and not pandas.isna(con_pro_score_list[x]):
+                    data.append([int(con_t_score_list[x]), con_pro_score_list[x]])
+        return data
+
+
+class Certificate(Creater):
+    def __init__(self):
+        super().__init__("证书名称")
+
+    def create(self):
+        certificate_name = [
+            "班赛优秀运动员",
+            "校赛优秀运动员",
+            "校级以上比赛优秀运动员",
+            "三级裁判",
+            "二级裁判",
+            "一级裁判", ]
+        return random.choices(certificate_name)[0]
 
 
 if __name__ == '__main__':
