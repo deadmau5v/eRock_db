@@ -92,7 +92,7 @@ def class_register(table_name, length):
     """班级注册"""
     all_semester_id = query(f"select semester_id from {tables['semester']}")
     all_semester_id = [i[0] for i in all_semester_id]
-    dt = creater.DateTime(start="2024-03-14 08:00:00")
+    dt = creater.DateTime(start="2024-03-14 08:00:00", sep=40)
     for i in range(1, length + 1):
         while True:
             # cr_id = i
@@ -244,6 +244,7 @@ def a_mark_sheet(table_name, length):
         et_id = random.randint(1, 100)  # 任务id
         et_time = query(f"select et_create_time from {tables['a_exercise_task']} where et_id = {et_id}")
         et_time = et_time[0][0]
+        # et_time = creater.
 
         stu_id = random.choice(all_student_id)  # 学生id
         tea_id = random.choice(all_teacher_id)  # 老师id
@@ -440,12 +441,10 @@ def add_a3_score():
     all_total_score_id = query(f"select ts_id from {tables['total_score']}")
     all_total_score_id = [str(i[0]) for i in all_total_score_id]
 
-
     for score_id in all_total_score_id:
         sql = f"select stu_id from {tables['total_score']} where ts_id = {score_id}"
         student_id = query(sql)
         student_id = student_id[0][0]
-
 
         ms_score = query(
             f"select ms_score from {tables['a_mark_sheet']} where stu_id = {student_id} ")
@@ -458,20 +457,111 @@ def add_a3_score():
         avs_score = query(f"select avs_score from {tables['module_score']} where ts_id = {score_id} and enum_id = 3")
         try:
             avs_score = avs_score[0][0]
-            avs_score = float(avs_score) + float(ms_score[0]) * 0.2
+            avs_score = float(avs_score) + float(ms_score[0]) * 0.1
             enum_id = "3"
             ts_id = score_id
             sql = f"UPDATE {tables['module_score']} SET avs_score = {avs_score} WHERE ts_id = {ts_id} and enum_id = {enum_id};"
             print(sql)
             execute(sql)
         except IndexError:
-            avs_score = float(ms_score[0]) * 0.2
+            avs_score = float(ms_score[0]) * 0.1
             enum_id = "3"
             ts_id = score_id
             sql = f"INSERT INTO {tables['module_score']} (ts_id, enum_id, avs_score) VALUES ({ts_id}, {enum_id}, {avs_score});"
             print(sql)
             execute(sql)
 
+
+def add_a3_physical_test(length=5):
+    all_teacher_id = query(f"select tea_id from {tables['teacher']}")
+    all_teacher_id = [str(i[0]) for i in all_teacher_id]
+    for teacher_id in all_teacher_id:
+        # 每位老师增加多个任务
+        for _ in range(length):
+            tea_id = teacher_id
+            enum_id = "3"
+            item = creater.Physical().create()
+            phy_name = item[0]
+            phy_descript = item[1]
+            phy_time = creater.RandomDateTime(start="2024-01-01 08:00:00", end="2024-04-01 00:00:00").create()
+            sql = f"INSERT INTO {tables['a2_a3_physical_test']} (tea_id, enum_id, phy_name, phy_descript, phy_time) VALUES ({tea_id}, {enum_id}, '{phy_name}', '{phy_descript}', '{phy_time}');"
+            print(sql)
+            execute(sql)
+
+
+def add_a3_physical_test_of_student():
+    all_physical_test_id = query(f"select phy_id from {tables['a2_a3_physical_test']}")
+    all_physical_test_id = [str(i[0]) for i in all_physical_test_id]
+    all_student_id = query(f"select stu_id from {tables['student']}")
+    all_student_id = [str(i[0]) for i in all_student_id]
+    for phy_id in all_physical_test_id:
+        # 每个任务
+        for student_id in all_student_id:
+            # 每个学生
+            stu_id = student_id
+            phy_id = phy_id
+            phys_stamina2 = random.randint(55, 100)
+            phys_speed2 = random.randint(55, 100)
+
+            sql = f"INSERT INTO {tables['a2_a3_physica_score']} (stu_id, phy_id, phys_stamina2, phys_speed2) VALUES ({stu_id}, {phy_id}, {phys_stamina2}, {phys_speed2});"
+            print(sql)
+            execute(sql)
+
+
+def is_chinese(char):
+    if '\u4e00' <= char <= '\u9fff':
+        return True
+    else:
+        return False
+
+
+def sys_to_english():
+    from xpinyin import Pinyin
+    pinyin = Pinyin()
+
+    # user_name 为 nick_name 拼音
+    sql = f"select nick_name, user_name from sys_user"
+    data = query(sql)
+    for i in data:
+        # 如果 user_name 为中文
+        user_name = i[1]
+        nick_name = i[0]
+        if is_chinese(user_name):
+            user_name = pinyin.get_pinyin(nick_name, '')
+            sql = f"UPDATE sys_user SET user_name = '{user_name}' WHERE nick_name = '{nick_name}';"
+            print(sql)
+            execute(sql)
+
+
+def alter_class_register_datetime():
+    all_class_register_id = query(f"select cr_id from {tables['class_register']}")
+    all_class_register_id = [str(i[0]) for i in all_class_register_id]
+    datetime_ = creater.DateTime(start="2024-03-14 08:00:00", sep=40)
+
+    for cr_id in all_class_register_id:
+        t = datetime_.create()
+        sql = f"UPDATE {tables['class_register']} SET cr_date = '{t}' WHERE cr_id = {cr_id};"
+        print(sql)
+        execute(sql)
+
+
+def alter_user_tx():
+    all_student_id = query(f"select stu_id from {tables['student']}")
+    all_student_id = [str(i[0]) for i in all_student_id]
+    for user_id in all_student_id:
+        url = creater.Tx_img().create()
+        sql = f"UPDATE {tables['student']} SET stu_img = '{url}' WHERE stu_id = {user_id};"
+        print(sql)
+        execute(sql)
+
+def alter_teacher_tx():
+    all_teacher_id = query(f"select tea_id from {tables['teacher']}")
+    all_teacher_id = [str(i[0]) for i in all_teacher_id]
+    for user_id in all_teacher_id:
+        url = creater.Tx_img().create()
+        sql = f"UPDATE {tables['teacher']} SET tea_img = '{url}' WHERE tea_id = {user_id};"
+        print(sql)
+        execute(sql)
 
 
 if __name__ == '__main__':
@@ -485,13 +575,33 @@ if __name__ == '__main__':
     # stu_to_teacher(tables["stu_to_tea"])  # 学生老师关系
     # _enumerate(tables["enumerate"])  # 枚举
     # a_exercise_task(tables["a_exercise_task"], 100)  # 任务表
-    # a_mark_sheet(tables["a_mark_sheet"], 100)  # 评分表
+    # a_mark_sheet(tables["a_mark_sheet"], 1000)  # 评分表
     # a_ball_exam(tables["a_ball_exam"])  # 投篮运球表
     # add_a_mark_sheet_score(tables["a_mark_sheet"], tables["a_ball_exam"])  # 计算分数
     # b1_franchise_club(tables["b1_franchise_club"], 100)  # 加入训练
     # b1_mass_source(tables["b1_mass_source"])  # 资源表
     # add_total_score(tables["total_score"], tables["student"])  # 注册总分表
 
-    add_a3_score()
+    # add_a3_score()  # a3 技能测试
+    # add_a3_physical_test()  # a3 体能测试
+    # add_a3_physical_test_of_student()  # a3 体能测试成绩
 
+    # 还没生成的表
+    # todo a1_answered
+    # todo a_exercise_resource
+    # todo a1_communication
+    # todo a1_teaching_source
+    # todo a2_ideological_performance
+    # todo a2_a3_physica_score
+    # todo a2_a3_physical_test
+    # todo a2_teaching_assistant_evaluation
+    # todo a2_student_evaluate
+    # todo a2_teaching_assistant
+    # todo a2_attendance
+
+    # sys_to_english()
+
+    # alter_class_register_datetime()  # 随机时间
+    # alter_teacher_tx()  # 修改教师头像
+    # alter_user_tx()  # 修改学生头像
     ...

@@ -300,5 +300,43 @@ class Certificate(Creater):
         return random.choices(certificate_name)[0]
 
 
+class Physical(Creater):
+    def __init__(self):
+        super().__init__("体能测试")
+
+    def create(self):
+        fitness_test_dict = {
+            "体能": "评估身体的基本素质和健康状况。",
+            "速度": "衡量快速移动的能力。",
+            "耐力": "衡量持续运动的能力。",
+            "力量": "评估肌肉力量和爆发力。",
+            "柔韧性": "衡量身体关节的活动范围。",
+            "协调性": "评估动作的准确性和流畅性。",
+            "技巧": "衡量特定运动技能的掌握程度。",
+            "准确性": "衡量运动中精确执行动作的能力。",
+            "心肺功能": "评估心脏和肺部的健康状况。",
+            "团队协作": "衡量在团队环境中与他人合作的能力。",
+            "灵活性": "评估快速改变方向或动作的能力。",
+            "敏捷性": "衡量对刺激的反应速度和动作的灵活性。",
+            "平衡性": "衡量保持身体稳定性的能力。",
+            "反应时间": "衡量对刺激做出反应的时间。",
+            "爆发力": "评估在最短时间内发挥最大力量的能力。",
+            "持久力": "衡量在长时间内保持高效运动的能力。",
+            "心理素质": "评估应对压力和挑战的心理能力。",
+            "战术理解": "衡量对运动策略和比赛计划的理解。",
+            "适应能力": "评估在面对新情况或变化时的快速适应能力。",
+            "恢复能力": "衡量身体在运动后的恢复速度和能力。"
+        }
+        return random.choice(list(fitness_test_dict.items()))
+
+
 if __name__ == '__main__':
     dt = DateTime(start="2024-03-14 08:00:00")
+
+
+class Tx_img(Creater):
+    def __init__(self):
+        super().__init__("头像URL")
+
+    def create(self):
+        return "https://cdn1.d5v.cc/CDN/Project/eRock/tx/%d.jpg" % random.randint(1, 21)
