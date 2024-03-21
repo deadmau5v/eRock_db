@@ -232,33 +232,46 @@ def a_exercise_task(table_name, length):
 
 # a_mark_sheet
 
-def a_mark_sheet(table_name, length):
+def a_mark_sheet(table_name):
     """评分表"""
     all_student_id = query(f"select stu_id from {tables['student']}")
     all_student_id = [str(i[0]) for i in all_student_id]
     all_teacher_id = query(f"select tea_id from {tables['teacher']}")
     all_teacher_id = [str(i[0]) for i in all_teacher_id]
 
-    for i in range(length):
-        # ms_id = i
-        et_id = random.randint(1, 100)  # 任务id
-        et_time = query(f"select et_create_time from {tables['a_exercise_task']} where et_id = {et_id}")
-        et_time = et_time[0][0]
-        # et_time = creater.
+    all_cr_id = query(f"select cr_id from {tables['class_register']}")
+    all_cr_id = [str(i[0]) for i in all_cr_id]
+    for stu in all_student_id:
+        for i in all_cr_id:
+            # ms_id = i
+            all_task_id = query(f"select et_id from {tables['a_exercise_task']} where cr_id = {i}")
+            all_task_id = [str(i[0]) for i in all_task_id]
+            try:
+                et_id = random.choice(all_task_id)  # 任务id
+            except IndexError:
+                continue
+            et_time = query(f"select et_create_time from {tables['a_exercise_task']} where et_id = {et_id}")
+            et_time = et_time[0][0]
+            datetimeobj = datetime.datetime.strptime(str(et_time), '%Y-%m-%d %H:%M:%S')
+            datetime.timedelta(minutes=random.randint(5, 30))
+            end_time = datetimeobj + datetime.timedelta(minutes=random.randint(5, 30))
 
-        stu_id = random.choice(all_student_id)  # 学生id
-        tea_id = random.choice(all_teacher_id)  # 老师id
-        # ms_score = random.randint(0, 100)  # eRock评分
-        ms_time = et_time + datetime.timedelta(minutes=random.randint(5, 30))  # 评分时间
-        # ms_dribble =
-        # ms_shooting =
+            stu_id = stu  # 学生id
+            tea_id = random.choice(all_teacher_id)  # 老师id
+            # ms_score = random.randint(0, 100)  # eRock评分
+            # ms_time = datetime.timedelta(minutes=random.randint(5, 30))  # 评分时间
+            ms_time = creater.RandomDateTime(start=datetimeobj.strftime('%Y-%m-%d %H:%M:%S'),
+                                             end=end_time.strftime('%Y-%m-%d %H:%M:%S')).create()
+            # ms_dribble =
+            # ms_shooting =
 
-        sql = (f"INSERT INTO {table_name} (et_id, stu_id, tea_id, ms_time) "
-               f"VALUES ({et_id}, {stu_id}, {tea_id}, '{ms_time}') "
-               f"ON DUPLICATE KEY UPDATE et_id = VALUES(et_id), stu_id = VALUES(stu_id), tea_id = VALUES(tea_id),"
-               f" ms_score = VALUES(ms_score), ms_time = VALUES(ms_time), ms_dribble = VALUES(ms_dribble),"
-               f" ms_shooting = VALUES(ms_shooting);")
-        execute(sql)
+            sql = (f"INSERT INTO {table_name} (et_id, stu_id, tea_id, ms_time) "
+                   f"VALUES ({et_id}, {stu_id}, {tea_id}, '{ms_time}') "
+                   f"ON DUPLICATE KEY UPDATE et_id = VALUES(et_id), stu_id = VALUES(stu_id), tea_id = VALUES(tea_id),"
+                   f" ms_score = VALUES(ms_score), ms_time = VALUES(ms_time), ms_dribble = VALUES(ms_dribble),"
+                   f" ms_shooting = VALUES(ms_shooting);")
+            print(sql)
+            execute(sql)
 
 
 def a_ball_exam(table_name):
@@ -554,12 +567,55 @@ def alter_user_tx():
         print(sql)
         execute(sql)
 
+
 def alter_teacher_tx():
     all_teacher_id = query(f"select tea_id from {tables['teacher']}")
     all_teacher_id = [str(i[0]) for i in all_teacher_id]
     for user_id in all_teacher_id:
         url = creater.Tx_img().create()
         sql = f"UPDATE {tables['teacher']} SET tea_img = '{url}' WHERE tea_id = {user_id};"
+        print(sql)
+        execute(sql)
+
+
+def a1_communication():
+    all_teaching_id = query(f"select teaching_id from {tables['teaching_table']}")
+    all_teaching_id = [str(i[0]) for i in all_teaching_id]
+    all_student_id = query(f"select stu_id from {tables['student']}")
+    all_student_id = [str(i[0]) for i in all_student_id]
+    for teaching_id in all_teaching_id:
+        for _ in range(random.randint(0, 5)):  # 每个教学资源有多个帖子
+            com_by = random.choice(all_student_id)
+            teaching_id = teaching_id
+            com_content = creater.Communication().create()
+            com_time = creater.RandomDateTime(start="2024-01-01 08:00:00", end="2024-04-01 00:00:00").create()
+
+            all_com_id = query(f"select com_id from {tables['a1_communication']} where teaching_id = {teaching_id}")
+            all_com_id = [str(i[0]) for i in all_com_id]
+            if len(all_com_id) and random.randint(0, 10) > 8:  # 20% 几率 有回复
+                selected = random.choice(all_com_id)
+                com_time_start = query(f"select com_time from {tables['a1_communication']} where com_id = {selected}")
+                com_time_start = com_time_start[0][0]
+                com_time_start = datetime.datetime.strptime(str(com_time_start), '%Y-%m-%d %H:%M:%S')
+                com_time = com_time_start + datetime.timedelta(minutes=random.randint(5, 30))
+                com_by = random.choice(all_student_id)
+                com_content = "回复: " + com_content
+                com_pid = selected
+            else:
+                com_pid = "NULL"
+
+            sql = f"INSERT INTO {tables['a1_communication']} (com_by, teaching_id, com_content, com_time, com_pid) VALUES ({com_by}, {teaching_id}, '{com_content}', '{com_time}', {com_pid});"
+            print(sql)
+            execute(sql)
+
+
+def a1_teaching_source():
+    all_teaching_url = query(f"select teaching_id, resource_url from {tables['teaching_table']}")
+    all_teaching_url = [(str(i[0]), str(i[1])) for i in all_teaching_url]
+    for url in all_teaching_url:
+        teaching_id = url[0]
+        teas_url = url[1]
+        sql = f"INSERT INTO {tables['a1_teaching_source']} (teas_url, teaching_id) VALUES ('{teas_url}', {teaching_id});"
         print(sql)
         execute(sql)
 
@@ -575,7 +631,7 @@ if __name__ == '__main__':
     # stu_to_teacher(tables["stu_to_tea"])  # 学生老师关系
     # _enumerate(tables["enumerate"])  # 枚举
     # a_exercise_task(tables["a_exercise_task"], 100)  # 任务表
-    # a_mark_sheet(tables["a_mark_sheet"], 1000)  # 评分表
+    # a_mark_sheet(tables["a_mark_sheet"])  # 评分表
     # a_ball_exam(tables["a_ball_exam"])  # 投篮运球表
     # add_a_mark_sheet_score(tables["a_mark_sheet"], tables["a_ball_exam"])  # 计算分数
     # b1_franchise_club(tables["b1_franchise_club"], 100)  # 加入训练
@@ -586,22 +642,14 @@ if __name__ == '__main__':
     # add_a3_physical_test()  # a3 体能测试
     # add_a3_physical_test_of_student()  # a3 体能测试成绩
 
-    # 还没生成的表
-    # todo a1_answered
-    # todo a_exercise_resource
-    # todo a1_communication
-    # todo a1_teaching_source
-    # todo a2_ideological_performance
-    # todo a2_a3_physica_score
-    # todo a2_a3_physical_test
-    # todo a2_teaching_assistant_evaluation
-    # todo a2_student_evaluate
-    # todo a2_teaching_assistant
-    # todo a2_attendance
-
-    # sys_to_english()
-
+    # sys_to_english()  # sys表用户改名
     # alter_class_register_datetime()  # 随机时间
+
     # alter_teacher_tx()  # 修改教师头像
     # alter_user_tx()  # 修改学生头像
+
+    # a1_teaching_source()  # 教学资源
+    a1_communication()  # 交流
+
+
     ...
