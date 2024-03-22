@@ -1,6 +1,7 @@
 import datetime
 import os
 import random
+import time
 
 import pymysql
 import creater
@@ -35,7 +36,9 @@ tables = {
     "a1_question": "a1_question",
     "a1_answer": "a1_answer",
     "a1_communication": "a1_communication",
-    "module_score": "module_score"
+    "module_score": "module_score",
+    "a1_task": "a1_task",
+    "sys_user": "sys_user"
 }
 
 
@@ -92,20 +95,30 @@ def class_register(table_name, length):
     """班级注册"""
     all_semester_id = query(f"select semester_id from {tables['semester']}")
     all_semester_id = [i[0] for i in all_semester_id]
-    dt = creater.DateTime(start="2024-03-14 08:00:00", sep=40)
+    dt = creater.DateTime(start="2024-03-15 08:00:00", sep=120)
     for i in range(1, length + 1):
         while True:
             # cr_id = i
-            task = creater.Task().create()
             semester_id = random.choice(all_semester_id)
             cr_date = dt.create()
-            cr_main = task[0].replace("任务", "课堂内容")
+            print(int(cr_date.split(" ")[1].split(":")[0]))
+
+            hour = cr_date.split(" ")[1].split(":")[0]
+            if hour in ["08", "14"]:
+                cr_main = "NULL"
+            else:
+                if int(hour) > 12:
+                    cr_main = "'运球'"
+                else:
+                    cr_main = "'投篮'"
+
             cr_duration = 40
             sql = (f"INSERT INTO {table_name} (semester_id, cr_date, cr_main, cr_duration) "
-                   f"VALUES ({semester_id}, '{cr_date}', '{cr_main}', {cr_duration}) "
+                   f"VALUES ({semester_id}, '{cr_date}', {cr_main}, {cr_duration}) "
                    f"ON DUPLICATE KEY UPDATE semester_id = VALUES(semester_id),"
                    f" cr_date = VALUES(cr_date), cr_main = VALUES(cr_main), cr_duration = VALUES(cr_duration);")
             try:
+                print(sql)
                 execute(sql)
                 break
             except pymysql.err.DataError:
@@ -123,11 +136,11 @@ def student(table_name, length, start):
     for i in range(start, start + length + 1):
         while True:
             # stu_id = i
-            class_id = random.choice(all_class_id)
+            # class_id = random.choice(all_class_id)
             stu_name = creater.Name().create()
             stu_password = "123456"
-            sql = (f"INSERT INTO {table_name} (class_id, stu_name, stu_password) "
-                   f"VALUES ({class_id}, '{stu_name}', '{stu_password}') "
+            sql = (f"INSERT INTO {table_name} (stu_name, stu_password) "
+                   f"VALUES ('{stu_name}', '{stu_password}') "
                    f"ON DUPLICATE KEY UPDATE  class_id = VALUES(class_id),"
                    f" stu_name = VALUES(stu_name), stu_password = VALUES(stu_password);")
             try:
@@ -213,7 +226,7 @@ def a_exercise_task(table_name, length):
     tea_id = [str(i[0]) for i in tea_id]
     all_enum_id = query(f"select enum_id from {tables['enumerate']}")
     all_enum_id = [str(i[0]) for i in all_enum_id]
-    for _ in range(length):
+    for i in range(length):
         task = creater.Task().create()
         cr_id = random.choice(all_class_id)  # 课堂id
         tea_id = random.choice(tea_id)  # 老师id
@@ -581,11 +594,12 @@ def alter_teacher_tx():
 def a1_communication():
     all_teaching_id = query(f"select teaching_id from {tables['teaching_table']}")
     all_teaching_id = [str(i[0]) for i in all_teaching_id]
-    all_student_id = query(f"select stu_id from {tables['student']}")
-    all_student_id = [str(i[0]) for i in all_student_id]
+    all_com_by = query(f"select user_id from {tables['sys_user']} where status = 0")
+    all_com_by = [str(i[0]) for i in all_com_by]
+
     for teaching_id in all_teaching_id:
         for _ in range(random.randint(0, 5)):  # 每个教学资源有多个帖子
-            com_by = random.choice(all_student_id)
+            com_by = random.choice(all_com_by)
             teaching_id = teaching_id
             com_content = creater.Communication().create()
             com_time = creater.RandomDateTime(start="2024-01-01 08:00:00", end="2024-04-01 00:00:00").create()
@@ -598,7 +612,7 @@ def a1_communication():
                 com_time_start = com_time_start[0][0]
                 com_time_start = datetime.datetime.strptime(str(com_time_start), '%Y-%m-%d %H:%M:%S')
                 com_time = com_time_start + datetime.timedelta(minutes=random.randint(5, 30))
-                com_by = random.choice(all_student_id)
+                com_by = random.choice(all_com_by)
                 com_content = "回复: " + com_content
                 com_pid = selected
             else:
@@ -620,14 +634,81 @@ def a1_teaching_source():
         execute(sql)
 
 
+def a1_task(length):
+    all_teacher_id = query(f"select tea_id from {tables['teacher']}")
+    all_teacher_id = [str(i[0]) for i in all_teacher_id]
+
+    for _ in range(length):
+        tea_id = random.choice(all_teacher_id)
+        task_datetime = creater.RandomDateTime(start="2024-01-01 08:00:00", end="2024-04-01 00:00:00").create()
+        task_title, task_content = creater.QuestionTask().create()
+        sql = f"INSERT INTO {tables['a1_task']} (tea_id, task_title, task_content, task_datetime) VALUES ({tea_id}, '{task_title}', '{task_content}', '{task_datetime}');"
+        print(sql)
+        execute(sql)
+
+
+def target(task_id, stu_id, table_name=tables["a1_answer"]):
+    task_id = task_id  # 任务id
+    stu_id = stu_id  # 学生id
+    ans_response = random.randint(10, 50)  # 学生回答
+    ans_apos = random.randint(ans_response - 10, ans_response)  # 学生位置
+    task_time = query(f"select task_datetime from {tables['a1_task']} where task_id = {task_id}")
+    task_time = task_time[0][0]
+    task_time = datetime.datetime.strptime(str(task_time), '%Y-%m-%d %H:%M:%S')
+    random_time_delta = datetime.timedelta(minutes=random.randint(5, 30))
+    ans_time = task_time + random_time_delta  # 学生回答时间
+    sql = f"INSERT INTO {table_name} (task_id, stu_id, ans_response, ans_apos, ans_time) VALUES ({task_id}, {stu_id}, {ans_response}, {ans_apos}, '{ans_time}');"
+    print(sql)
+    execute(sql)
+
+
+def a1_answer():
+    import concurrent.futures
+
+    all_task_id = query(f"select task_id from {tables['a1_task']}")
+    all_task_id = [str(i[0]) for i in all_task_id]
+    all_student_id = query(f"select stu_id from {tables['student']}")
+    all_student_id = [str(i[0]) for i in all_student_id]
+
+    with concurrent.futures.ProcessPoolExecutor(max_workers=5) as executor:
+        for task_id in all_task_id:
+            for stu_id in all_student_id:
+                print(task_id, stu_id)
+                executor.submit(target, task_id=task_id, stu_id=stu_id)
+
+
+def add_sys_user_tx():
+    res = query(f"select user_id, avatar from {tables['sys_user']}")
+
+    for i in zip(res):
+        user_id, avatar = i[0][0], i[0][1]
+        if not avatar:
+            url = creater.Tx_img().create()
+            sql = f"UPDATE {tables['sys_user']} SET avatar = '{url}' WHERE user_id = {user_id};"
+            print(sql)
+            execute(sql)
+
+
+def add_class_student(length, class_id=1):
+    all_gg_id = query(f"select gg_id from {tables['stu_group']}")
+    all_gg_id = [str(i[0]) for i in all_gg_id]
+    for _ in range(length):
+        gg_id = random.choice(all_gg_id)
+        stu_name = creater.Name().create()
+        stu_img = creater.Tx_img().create()
+        sql = f"INSERT INTO {tables['student']} (gg_id, class_id, stu_name, stu_img, stu_password) VALUES ({gg_id}, {class_id}, '{stu_name}', '{stu_img}', '123456');"
+        print(sql)
+        execute(sql)
+
+
 if __name__ == '__main__':
     # grade(tables["grade"])  # 班级
     # semester(tables["semester"])  # 学期
-    # class_register(tables["class_register"], 10)  # 班级注册
+    # class_register(tables["class_register"], 24)  # 班级注册
     # student(tables["student"], 100, 202253210250)  # 学生注册
     # stu_group(tables["stu_group"], 8)  # 小组注册
     # add_student_to_group(tables["stu_group"], tables["student"])  # 学生分组
-    # teacher(tables["teacher"], 3)  # 老师注册
+    # teacher(tables["teacher"], 3)  # 老师注册clas
     # stu_to_teacher(tables["stu_to_tea"])  # 学生老师关系
     # _enumerate(tables["enumerate"])  # 枚举
     # a_exercise_task(tables["a_exercise_task"], 100)  # 任务表
@@ -649,7 +730,13 @@ if __name__ == '__main__':
     # alter_user_tx()  # 修改学生头像
 
     # a1_teaching_source()  # 教学资源
-    a1_communication()  # 交流
+    # a1_communication()  # 交流
 
+    # a1_task(100)
+
+    # a1_answer()
+
+    # add_sys_user_tx()
+    # add_class_student(31)
 
     ...
